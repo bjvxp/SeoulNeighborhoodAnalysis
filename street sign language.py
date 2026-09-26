@@ -7,7 +7,8 @@ st.set_page_config(page_title="Urban Typography Ethnography", layout="wide")
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv("E:/street_imagery_project/metadata/spatial_typography_master.csv")
+    # Using a relative path works on both your local machine and the cloud server
+    df = pd.read_csv("metadata/spatial_typography_master.csv")
     df = df.dropna(subset=['latitude', 'longitude'])
     return df
 
