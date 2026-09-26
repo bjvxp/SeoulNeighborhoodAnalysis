@@ -3,23 +3,23 @@ import pandas as pd
 import pydeck as pdk
 
 # Force the dark-mode aesthetic
-st.set_page_config(page_title="Urban Typography Ethnography", layout="wide")
+st.set_page_config(page_title="Multi-Modal Urban Ethnography", layout="wide")
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv("metadata/spatial_typography_master.csv")
+    df = pd.read_csv("metadata/master_multimodal_dataset.csv")
     df = df.dropna(subset=['latitude', 'longitude'])
     return df
 
 df_master = load_data()
 
-st.title("🏙️ Urban Typography: Seoul vs. Jeju")
-st.markdown("A visual ethnography dashboard measuring curb complexity and typographic density for logistics routing.")
+st.title("🏙️ Multi-Modal Urban Ethnography: Seoul vs. Jeju")
+st.markdown("Comparing hyper-dense commercial typography against natural coastal and vegetative landscapes for spatial planning.")
 
+# --- GLOBAL SIDEBAR CONTROLS ---
 sidebar = st.sidebar
-sidebar.header("Spatial Filters")
+sidebar.header("Global Spatial Filters")
 
-# --- 1. SIDEBAR CONTROLS ---
 all_neighborhoods = list(df_master['neighborhood'].unique())
 selected_neighborhoods = sidebar.multiselect(
     "Select Zones to Compare", 
@@ -31,53 +31,56 @@ if not selected_neighborhoods:
     st.warning("Please select at least one neighborhood from the sidebar.")
     st.stop()
 
-# INTEGRATION POINT 1: We create a new dataframe containing only the selected neighborhoods
 df_filtered = df_master[df_master['neighborhood'].isin(selected_neighborhoods)].copy()
 
-# --- 2. COLOR LEGEND ---
-def get_color(lang):
-    if lang == 'Hangul': return [50, 168, 82, 200]
-    elif lang == 'English': return [66, 135, 245, 200]
-    elif lang == 'Mixed': return [235, 143, 52, 200]
-    return [100, 100, 100, 150]
+# --- STREAMLIT TABS ARCHITECTURE ---
+tab1, tab2 = st.tabs([
+    "🏙️ Urban Typography & Curb Complexity", 
+    "🌿 Environmental Segmentation (Green / Blue / Grey)"
+])
 
-df_filtered['color'] = df_filtered['frame_language'].apply(get_color)
+# ==========================================
+# TAB 1: TYPOGRAPHY & LANGUAGE DENSITY
+# ==========================================
+with tab1:
+    st.subheader("Linguistic Signage & Curb Complexity")
+    st.markdown("Examines the ratio of Hangul, English, and Mixed signage across urban grids (Seoul vs. Jeju City).")
 
-sidebar.markdown("### Language Legend")
-legend_html = ("")
+    # Colors for languages
+    def get_lang_color(lang):
+        if lang == 'Hangul': return [50, 168, 82, 200]
+        elif lang == 'English': return [66, 135, 245, 200]
+        elif lang == 'Mixed': return [235, 143, 52, 200]
+        return [100, 100, 100, 150]
 
-# --- 3. MAP LAYERS ---
-layer = pdk.Layer(
-    "ColumnLayer",
-    data=df_filtered,  # INTEGRATION POINT 2: The layer now reads from the filtered data, not the master data
-    get_position=["longitude", "latitude"],
-    get_elevation="sign_count",
-    elevation_scale=15,
-    radius=30,
-    get_fill_color="color",
-    pickable=True,
-    auto_highlight=True,
-)
+    df_filtered['lang_color'] = df_filtered['frame_language'].apply(get_lang_color)
 
-# INTEGRATION POINT 3: PyDeck automatically calculates the bounding box and zoom level based on the remaining points
-view_state = pdk.data_utils.compute_view(df_filtered[["longitude", "latitude"]])
-view_state.pitch = 45 
+    layer_tab1 = pdk.Layer(
+        "ColumnLayer",
+        data=df_filtered,
+        get_position=["longitude", "latitude"],
+        get_elevation="sign_count",
+        elevation_scale=15,
+        radius=30,
+        get_fill_color="lang_color",
+        pickable=True,
+        auto_highlight=True,
+    )
 
-# INTEGRATION POINT 4: The view_state and layer are injected into the final map render
-r = pdk.Deck(
-    layers=[layer],
-    initial_view_state=view_state,
-    map_style="dark",
-    tooltip={
-        "text": "Zone: {neighborhood}\nLanguage: {frame_language}\nSigns: {sign_count}\nText: {combined_text}"
-    }
-)
+    view_state_tab1 = pdk.data_utils.compute_view(df_filtered[["longitude", "latitude"]])
+    view_state_tab1.pitch = 45 
 
-st.pydeck_chart(r)
+    r_tab1 = pdk.Deck(
+        layers=[layer_tab1],
+        initial_view_state=view_state_tab1,
+        map_style="dark",
+        tooltip={"text": "Zone: {neighborhood}\nLanguage: {frame_language}\nSigns: {sign_count}\nText: {combined_text}"}
+    )
+    st.pydeck_chart(r_tab1)
 
-# --- 4. DYNAMIC METRICS ---
-col1, col2, col3 = st.columns(3)
-# INTEGRATION POINT 5: The bottom metrics also update dynamically based on the filtered data
-col1.metric("Total Spatial Points", len(df_filtered))
-col2.metric("Peak Curb Complexity", df_filtered['sign_count'].max())
-col3.metric("Zero-Text Routes", len(df_filtered[df_filtered['sign_count'] == 0]))
+    # Tab 1 Legend & Metrics
+    col1, col2 = st.columns([1, 2])
+    with col1:
+        st.markdown("**Language Legend**")
+        st.markdown(
+            "
