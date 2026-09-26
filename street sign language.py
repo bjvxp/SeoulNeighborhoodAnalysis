@@ -45,4 +45,4 @@ df_filtered['color'] = df_filtered['frame_language'].apply(get_color)
 
 # 2. Add the Color Legend to the Sidebar
 sidebar.markdown("### Language Legend")
-sidebar.markdown(""")
+sidebar.markdown("")
