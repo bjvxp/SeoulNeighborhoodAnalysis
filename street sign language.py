@@ -132,9 +132,9 @@ metric_view = sidebar.selectbox(
 
 # Configure column mapping based on selection
 
-    elif "Green-Space" in metric_view:
-    elevation_col = "green_space_ratio"
-    elevation_scale = 300  
-    color_series = df_filtered['green_space_ratio'].apply(lambda r: [34, 139, 34, int(100 + 155 * r)])
-    legend_title = "Environmental Metric"
-    legend_html = ("")
+elif "Green-Space" in metric_view:
+ elevation_col = "green_space_ratio"
+ elevation_scale = 300  
+ color_series = df_filtered['green_space_ratio'].apply(lambda r: [34, 139, 34, int(100 + 155 * r)])
+ legend_title = "Environmental Metric"
+ legend_html = ("")
