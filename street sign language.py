@@ -44,5 +44,4 @@ def get_color(lang):
 df_filtered['color'] = df_filtered['frame_language'].apply(get_color)
 
 sidebar.markdown("### Language Legend")
-legend_html = (
-    "
+legend_html = ("")
