@@ -81,4 +81,3 @@ col1, col2, col3 = st.columns(3)
 col1.metric("Total Spatial Points", len(df_filtered))
 col2.metric("Peak Curb Complexity", df_filtered['sign_count'].max())
 col3.metric("Zero-Text Routes", len(df_filtered[df_filtered['sign_count'] == 0]))
-```
